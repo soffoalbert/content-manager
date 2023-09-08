@@ -4,7 +4,6 @@ import { UserController } from './user/user.controller';
 import { DatabaseModule } from './database/database.module';
 import { ConfigModule } from '@nestjs/config';
 import * as Joi from '@hapi/joi';
-import { AuthenticationModule } from './authentication/authentication.module';
 
 @Module({
   imports: [
@@ -19,7 +18,6 @@ import { AuthenticationModule } from './authentication/authentication.module';
       }),
     }),
     DatabaseModule,
-    AuthenticationModule,
     UserModule,
   ],
   controllers: [UserController],
