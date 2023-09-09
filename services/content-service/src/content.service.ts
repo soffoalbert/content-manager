@@ -19,11 +19,13 @@ export class ContentService {
 
     async uploadFile(file): Promise<ManagedUpload.SendData> {
         try {
-            return this.s3.upload({
+            return await this.s3.upload({
                 Key: file.originalname.split('.').slice(0, -1).join('.'),
                 Bucket: this.bucketName, Body: Buffer.from(file.buffer.data), ACL: 'public-read'
             }).promise();
         } catch (error) {
+            console.error(error)
+
             throw new RpcException('An Unexpected error occured when uploading the content to AWS S3');
         }
     }
@@ -35,6 +37,7 @@ export class ContentService {
                 content.fileUrl = Location
             return await this.contentRepository.save(content);
         } catch (error) {
+
             throw new RpcException('An Unexpected error occured when storing the content');
         }
 

@@ -14,8 +14,7 @@ export class ContentController {
         try {
             const contentToStore = new Content()
             contentToStore.file = data.file
-            const content: Content = await this.contentService.store(contentToStore);
-            return content
+            return await this.contentService.store(contentToStore);
         } catch (error) {
             throw new RpcException(error.message)
         }

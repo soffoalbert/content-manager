@@ -5,15 +5,28 @@ import { ReviewAuthorizationGuard } from './review.auth.guard';
 import { Request, Response } from 'express';
 import { RpcException } from '@nestjs/microservices';
 import { ContentReviewerGuard } from './reviewer.guard';
-
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 @Controller('review')
+@ApiTags('Review')
 export class ReviewController {
     constructor(private readonly reviewClient: ReviewClient) { }
 
     @Get()
     @UseGuards(ContentReviewerGuard)
-    async review(@Query('documentId') documentId: number, @Query('userId') userId: number, @Query('approval') approval: string, @Res() res: Response) {
+    @ApiOperation({ summary: 'Review content' })
+    @ApiQuery({ name: 'documentId', type: 'number', required: true })
+    @ApiQuery({ name: 'userId', type: 'number', required: true })
+    @ApiQuery({ name: 'approval', type: 'string', required: true })
+    @ApiResponse({ status: 200, description: 'Review result' })
+    @ApiResponse({ status: 302, description: 'Redirect to review result page' })
+    @ApiBearerAuth()
+    async review(
+        @Query('documentId') documentId: number,
+        @Query('userId') userId: number,
+        @Query('approval') approval: string,
+        @Res() res: Response,
+    ) {
         try {
             const review = await this.reviewClient.review({ documentId, userId, approval });
             console.log(review)
@@ -29,6 +42,7 @@ export class ReviewController {
             throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 
     @Get('rejected')
     reject(@Res() res: Response) {

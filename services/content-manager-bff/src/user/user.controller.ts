@@ -1,8 +1,22 @@
 import { Body, Controller, HttpException, Post, UnauthorizedException, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiBadRequestResponse, ApiOperation, ApiParam, ApiResponse, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
+import {
+  ApiBadRequestResponse,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+  ApiUnauthorizedResponse,
+  ApiBody,
+  ApiParam,
+} from '@nestjs/swagger';
 import { AuthenticationClient } from './user.client';
 import { AuthorizationGuard } from 'src/authentication.guard';
+
+export class LoginDto {
+  username: string
+  password: string
+  userType: string
+}
 
 @Controller('auth')
 @ApiTags('Authentication')
@@ -47,21 +61,15 @@ export class AuthenticationController {
       },
     },
   })
-  @ApiParam({
-    name: 'username',
-    description: 'User username (email or username)',
-    required: true,
+  @ApiBody({
+    description: 'Login credentials',
+    type: LoginDto, // Define a DTO for your login payload
   })
-  @ApiParam({
-    name: 'password',
-    description: 'User password',
-    required: true,
-  })
-  async login(@Body() user: { username: string, password: string, role: string }) {
+  async login(@Body() loginDto: LoginDto) {
     try {
-      return await this.authenticationClient.login(user)
+      return await this.authenticationClient.login(loginDto);
     } catch (error) {
-      throw new HttpException(error.message, error.status)
+      throw new HttpException(error.message, error.status);
     }
   }
 }

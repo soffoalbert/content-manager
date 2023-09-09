@@ -7,6 +7,7 @@ export const swaggerConfig = (app) => {
     .setVersion('1.0')
     .addTag('Authentication')
     .addTag('User')
+    .addBearerAuth()
     .build();
 
   const document = SwaggerModule.createDocument(app, options);
