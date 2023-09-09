@@ -1,8 +1,8 @@
-import { HttpException, HttpStatus, Inject, Injectable, RequestTimeoutException, UnauthorizedException } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ClientProxy } from '@nestjs/microservices';
 import * as bcrypt from 'bcrypt';
-import { TimeoutError, catchError, firstValueFrom, throwError, timeout } from 'rxjs';
+import { catchError, firstValueFrom, timeout } from 'rxjs';
 
 @Injectable()
 export class AuthenticationService {

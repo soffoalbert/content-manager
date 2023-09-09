@@ -35,11 +35,9 @@ export class ReviewController {
     } catch (error) {
 
       if (error.message === 'You have already voted on this document') {
-        // Handle the specific error and throw a custom exception
-        throw new RpcException('You have already voted on this document');
+        throw new RpcException(error.message);
       } else {
-        // Handle other errors and throw appropriate exceptions
-        throw new RpcException('Internal Server Error');
+        throw new RpcException(error.message);
       }
     }
   }
@@ -51,11 +49,9 @@ export class ReviewController {
     } catch (error) {
 
       if (error.message === 'You have already voted on this document') {
-        // Handle the specific error and throw a custom exception
-        throw new RpcException('You have already voted on this document');
+        throw new RpcException(error.message);
       } else {
-        // Handle other errors and throw appropriate exceptions
-        throw new RpcException('Internal Server Error');
+        throw new RpcException(error.message );
       }
     }
   }

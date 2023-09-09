@@ -17,13 +17,17 @@ export class AdministratorClient {
         this.userClient.send({ cmd: 'register' }, { ...user }).pipe(
           timeout(5000),
           catchError((error) => {
-            console.log(error.message)
+            console.error(error)
+            // NOTE THIS COULD BE IMPROVED WITH AN ERROR CODE SYSTEM BUT FOR SIMPLICITY SAKE I USE ERROR MESSAGES INSTEAD 
+            if (error.message == 'Username or email address is already taken.') {
+              throw new HttpException(error.message, HttpStatus.CONFLICT);
+            }
             throw error
           }),
         ),
       );
     } catch (error) {
-      if (error.message == 'Username or email address is already taken.') {
+      if (error.status == HttpStatus.CONFLICT) {
         throw new HttpException(error.message, HttpStatus.CONFLICT);
       }
       catchErrorAndThrow('Error registering the user', error);
@@ -47,7 +51,6 @@ export class AdministratorClient {
   }
 
   async login(user: any): Promise<{ access_token: string }> {
-
     try {
       return await firstValueFrom(
         this.authClient.send({ cmd: 'login' }, { ...user }).pipe(
@@ -108,11 +111,15 @@ export class AdministratorClient {
           timeout(5000),
           catchError((error) => {
             console.log(error.message)
-            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new HttpException(error.message, HttpStatus.CONFLICT);
           }),
         ),
       );
     } catch (error) {
+      console.error(error)
+      if (error.status == HttpStatus.CONFLICT) {
+        throw new HttpException(error.message, HttpStatus.CONFLICT);
+      }
       catchErrorAndThrow('Error assigning reviewer', error);
     }
   }

@@ -3,7 +3,7 @@ import { Controller, Post, UploadedFile, UseInterceptors, Body, ValidationPipe, 
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ContentService } from './content.service';
 import { Content } from './content.entity';
-import { MessagePattern, Payload } from '@nestjs/microservices';
+import { MessagePattern, Payload, RpcException } from '@nestjs/microservices';
 
 @Controller('content')
 export class ContentController {
@@ -11,41 +11,51 @@ export class ContentController {
 
     @MessagePattern({ cmd: 'upload' })
     async uploadFile(@Payload() data) {
-        const contentToStore = new Content()
-        contentToStore.file = data.file
-        const content: Content = await this.contentService.store(contentToStore);
-        return content
+        try {
+            const contentToStore = new Content()
+            contentToStore.file = data.file
+            const content: Content = await this.contentService.store(contentToStore);
+            return content
+        } catch (error) {
+            throw new RpcException(error.message)
+        }
     }
 
     @MessagePattern({ cmd: 'update' })
     async update(@Payload() data) {
-        const content = await this.contentService.getContentById(data.documentId);
+        try {
+            const content = await this.contentService.getContentById(data.documentId);
 
-        const contentToStore = new Content()
-        contentToStore.status = data.status
-        contentToStore.id = content.id
-        contentToStore.file = content.file
+            const contentToStore = new Content()
+            contentToStore.status = data.status
+            contentToStore.id = content.id
+            contentToStore.file = content.file
 
-        return await this.contentService.update(contentToStore);
+            return await this.contentService.update(contentToStore);
+        } catch (error) {
+            throw new RpcException(error.message)
+        }
     }
 
     @MessagePattern({ cmd: 'findContentById' })
     async findContentById(@Payload() documentId: any) {
-        console.log(documentId)
-        const content = await this.contentService.getContentById(documentId);
-        if (!content) {
-            throw new NotFoundException('Content not found');
+        try {
+            console.log(documentId)
+            const content = await this.contentService.getContentById(documentId);
+            return content;
+        } catch (error) {
+            throw new RpcException(error.message)
         }
-        return content;
     }
 
     @MessagePattern({ cmd: 'getManyDocumentByIds' })
     async getManyDocumentByIds(@Payload() documentIds: any) {
-        console.log(documentIds)
-        const content = await this.contentService.getManyContentByIds(documentIds);
-        if (!content) {
-            throw new NotFoundException('Content not found');
+        try {
+            console.log(documentIds)
+            const content = await this.contentService.getManyContentByIds(documentIds);
+            return content;
+        } catch (error) {
+            throw new RpcException(error.message)
         }
-        return content;
     }
 }

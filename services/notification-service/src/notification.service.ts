@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
 import { createWriteStream } from 'fs';
+import { RpcException } from '@nestjs/microservices';
 
 @Injectable()
 export class NotificationService {
@@ -177,7 +178,7 @@ export class NotificationService {
       return 'res';
     } catch (error) {
       console.error('Error sending email:', error);
-      throw error; // Propagate the error to the caller
+      throw new RpcException(error.message); // Propagate the error to the caller
     }
   }
 }

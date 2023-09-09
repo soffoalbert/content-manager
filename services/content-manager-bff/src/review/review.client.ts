@@ -19,16 +19,15 @@ export class ReviewClient {
             catchError((error) => {
               console.log(error.message)
               if (error.message === 'You have already voted on this document') {
-                throw new HttpException('You have already voted on this document', HttpStatus.CONFLICT);
-              } else {
-                throw new HttpException('Unable to review the document', HttpStatus.INTERNAL_SERVER_ERROR);
+                throw new HttpException(error.message, HttpStatus.CONFLICT);
               }
+              throw new HttpException('Unable to review the document', HttpStatus.INTERNAL_SERVER_ERROR);
             }),
           ),
       );
     } catch (error) {
-      if (error.message === 'You have already voted on this document') {
-        throw new Error('You have already voted on this document');
+      if (error.status === HttpStatus.CONFLICT) {
+        throw new HttpException(error.message, HttpStatus.CONFLICT);
       }
       throw new Error('Unable to review the document');
     }

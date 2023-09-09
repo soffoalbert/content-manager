@@ -1,4 +1,4 @@
-import { Inject, Injectable, RequestTimeoutException, UnauthorizedException } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable, RequestTimeoutException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ClientProxy } from '@nestjs/microservices';
 import * as bcrypt from 'bcrypt';
@@ -15,28 +15,20 @@ export class AuthenticationClient {
       const token = await firstValueFrom(
         this.authClient.send({ cmd: 'login' }, { ...user }).pipe(
           catchError((error) => {
-            throw new Error(error.message);
+            if (error.message == 'username, role or password incorrect') {
+              throw new HttpException(error.message, HttpStatus.UNAUTHORIZED);
+            }
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
           }),
         ),
       );
       return token;
     } catch (error) {
-      throw new UnauthorizedException(error.message)
+      if (error.status == HttpStatus.UNAUTHORIZED) {
+        throw new UnauthorizedException(error.message)
+      }
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
-
-  }
-
-  async register(user): Promise<{ access_token: string }> {
-    const userStored = await firstValueFrom(
-      this.userClient.send({ cmd: 'register' }, { ...user }).pipe(
-        catchError((error) => {
-          // Handle errors here
-          console.error('Error registering the user:', error.message);
-          throw new Error('Unable to register User');
-        }),
-      ),
-    );
-    return userStored;
   }
 
   async onApplicationBootstrap() {

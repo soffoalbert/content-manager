@@ -15,9 +15,6 @@ export class AdministratorController {
     try {
       return this.administratorClient.register(user)
     } catch (error) {
-      if (error.message == 'Username or email address is already taken.') {
-        throw new HttpException(error.message, HttpStatus.CONFLICT);
-      }
       throw new HttpException(error.message, error.status)
     }
   }

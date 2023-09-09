@@ -2,7 +2,7 @@ import { ConflictException, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Review, ReviewStatus } from './review.entity';
-import { ClientProxy } from '@nestjs/microservices';
+import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { Observable, catchError, firstValueFrom, throwError } from 'rxjs';
 
 @Injectable()
@@ -33,27 +33,32 @@ export class ReviewService {
 
       return storedReview;
     } catch (error) {
-      throw error;
+      throw new RpcException(error.message);
     }
   }
 
   async initiate(documentId): Promise<any> {
-    const storedReviews = await this.reviewRepository.find({ where: { documentId, approval: ReviewStatus.Pending } });
+    try {
+      const storedReviews = await this.reviewRepository.find({ where: { documentId, approval: ReviewStatus.Pending } });
 
-   storedReviews.forEach(async (review) => {
-      const user =  await this.getUser(review.userId)
-      const document = await this.getDocument(review.documentId);
+      storedReviews.forEach(async (review) => {
+         const user =  await this.getUser(review.userId)
+         const document = await this.getDocument(review.documentId);
+   
+         const notification = await this.notifyUser({
+           ...review,
+           user: { ...user },
+           fileUrl: document.fileUrl,
+           fileName: document.fileName,
+           submittedAt: document.createdAt,
+         });
+       })
+   
+       return storedReviews
+    } catch (error) {
+      throw new RpcException(error.message);
+    }
 
-      const notification = await this.notifyUser({
-        ...review,
-        user: { ...user },
-        fileUrl: document.fileUrl,
-        fileName: document.fileName,
-        submittedAt: document.createdAt,
-      });
-    })
-
-    return storedReviews
   }
 
   async review(review): Promise<Review> {
@@ -72,7 +77,7 @@ export class ReviewService {
       return await this.reviewRepository.save(reviewRetrived)
 
     } catch (error) {
-      throw error;
+      throw new RpcException(error.message);
     }
   }
 
@@ -87,7 +92,7 @@ export class ReviewService {
 
       return this.getDocumentByIds(documentIds)
     } catch (error) {
-      throw error;
+      throw new RpcException(error.message);
     }
   }
 
@@ -108,7 +113,7 @@ export class ReviewService {
 
       return user;
     } catch (error) {
-      throw error;
+      throw new RpcException(error.message);
     }
   }
 
@@ -129,7 +134,7 @@ export class ReviewService {
 
       return document;
     } catch (error) {
-      throw error;
+      throw new RpcException(error.message);
     }
   }
 
@@ -147,7 +152,7 @@ export class ReviewService {
         return { url: document.fileUrl, fileName: document.fileName }
       });
     } catch (error) {
-      throw error;
+      throw new RpcException(error.message);
     }
   }
 
@@ -164,7 +169,7 @@ export class ReviewService {
 
       return notification;
     } catch (error) {
-      throw error;
+      throw new RpcException(error.message);
     }
   }
 
@@ -180,7 +185,7 @@ export class ReviewService {
         ),
       );
     } catch (error) {
-      throw error;
+      throw new RpcException(error.message);
     }
   }
 

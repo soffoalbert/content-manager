@@ -15,7 +15,6 @@ export class ReviewController {
     @UseGuards(ContentReviewerGuard)
     async review(@Query('documentId') documentId: number, @Query('userId') userId: number, @Query('approval') approval: string, @Res() res: Response) {
         try {
-
             const review = await this.reviewClient.review({ documentId, userId, approval });
             console.log(review)
             if (review.approval === 'rejected') {
