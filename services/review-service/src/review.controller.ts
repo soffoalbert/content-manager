@@ -6,12 +6,26 @@ import { ExceptionFilter } from './rpc-exception.filter';
 
 @Controller()
 export class ReviewController {
-  constructor(private readonly reviewService: ReviewService) {}
+  constructor(private readonly reviewService: ReviewService) { }
 
   @MessagePattern({ cmd: 'submit' })
   async submit(@Payload() data): Promise<Review> {
-    console.log(data);
-    return await this.reviewService.submitForReview(data);
+    try {
+      return await this.reviewService.submitForReview(data);
+    } catch (error) {
+      throw new RpcException(error.message);
+    }
+  }
+
+  @MessagePattern({ cmd: 'initiate' })
+  async initiate(@Payload() documentId): Promise<Review> {
+    try {
+      console.log(documentId);
+      return await this.reviewService.initiate(documentId);
+    } catch (error) {
+      throw new RpcException(error.message);
+    }
+
   }
 
   @MessagePattern({ cmd: 'review' })
@@ -19,7 +33,7 @@ export class ReviewController {
     try {
       return await this.reviewService.review(data as Review);
     } catch (error) {
-  
+
       if (error.message === 'You have already voted on this document') {
         // Handle the specific error and throw a custom exception
         throw new RpcException('You have already voted on this document');
@@ -35,7 +49,7 @@ export class ReviewController {
     try {
       return await this.reviewService.findByApproval(data as ReviewStatus);
     } catch (error) {
-  
+
       if (error.message === 'You have already voted on this document') {
         // Handle the specific error and throw a custom exception
         throw new RpcException('You have already voted on this document');

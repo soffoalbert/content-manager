@@ -57,7 +57,7 @@ export class AuthenticationController {
     description: 'User password',
     required: true,
   })
-  async login(@Body() user: { username: string, password: string, userType: string }) {
+  async login(@Body() user: { username: string, password: string, role: string }) {
     return this.authenticationClient.login(user)
   }
 

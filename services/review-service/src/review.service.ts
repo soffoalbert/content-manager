@@ -19,13 +19,11 @@ export class ReviewService {
       const user = await this.getUser(review.userId);
       const document = await this.getDocument(review.documentId);
 
-      const notification = await this.notifyUser({
-        ...review,
-        user: { ...user },
-        fileUrl: document.fileUrl,
-        fileName: document.fileName,
-        submittedAt: document.createdAt,
-      });
+      const storedReviews = await this.reviewRepository.findOne({ where: { documentId: review.documentId, userId: review.userId } });
+
+      if (storedReviews) {
+        throw new ConflictException('You have already submitted this document for review to this user');
+      }
 
       const reviewToStore = new Review();
       reviewToStore.approval = ReviewStatus.Pending;
@@ -37,6 +35,25 @@ export class ReviewService {
     } catch (error) {
       throw error;
     }
+  }
+
+  async initiate(documentId): Promise<any> {
+    const storedReviews = await this.reviewRepository.find({ where: { documentId, approval: ReviewStatus.Pending } });
+
+   storedReviews.forEach(async (review) => {
+      const user =  await this.getUser(review.userId)
+      const document = await this.getDocument(review.documentId);
+
+      const notification = await this.notifyUser({
+        ...review,
+        user: { ...user },
+        fileUrl: document.fileUrl,
+        fileName: document.fileName,
+        submittedAt: document.createdAt,
+      });
+    })
+
+    return storedReviews
   }
 
   async review(review): Promise<Review> {
@@ -61,7 +78,7 @@ export class ReviewService {
 
   async findByApproval(approval: ReviewStatus): Promise<any> {
     try {
-      const reviews =  await this.reviewRepository.find({ where: { approval } });
+      const reviews = await this.reviewRepository.find({ where: { approval } });
       console.log(reviews)
       const documentIds = reviews.map((review: Review) => {
         return review.documentId
@@ -127,7 +144,7 @@ export class ReviewService {
         ),
       );
       return documents.map((document) => {
-        return {url: document.fileUrl, fileName: document.fileName}
+        return { url: document.fileUrl, fileName: document.fileName }
       });
     } catch (error) {
       throw error;

@@ -1,6 +1,7 @@
-import { Controller } from '@nestjs/common';
+import { Controller, UseGuards } from '@nestjs/common';
 import { AuthenticationService } from './authentication.service';
 import { MessagePattern, Payload } from '@nestjs/microservices';
+import { LocalStrategy } from './local.strategy';
 
 @Controller()
 export class AuthenticationController {

@@ -1,5 +1,11 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
 
+export enum Role {
+  ADMINISTRATOR = 'ADMINISTRATOR',
+  CONTENT_CREATOR = 'CONTENT_CREATOR',
+  CONTENT_REVIEWER = 'CONTENT_REVIEWER'
+}
+
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
@@ -14,11 +20,11 @@ export class User {
   @Column()
   name: string;
 
-  @Column()
+  @Column({unique: true})
   emailAddress: string;
 
   @Column()
-  userType: string;
+  userType: Role;
 
   @CreateDateColumn()
   createdAt: Date

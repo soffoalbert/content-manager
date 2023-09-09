@@ -9,18 +9,19 @@ export class AuthenticationService {
   constructor(
     private readonly jwtService: JwtService,
     @Inject('USER_SERVICE') private client: ClientProxy,
-  ) {}
+  ) { }
 
-  async validateUser(username: string, password: string) {
+  async validateUser(username: string, password: string, role: string) {
     const user = await this.client.send({ role: 'user', cmd: 'find' }, { username }).toPromise();
-    if (user && (await this.comparePasswords(password, user.password))) {
+    if (user && role === user.userType && (await this.comparePasswords(password, user.password))) {
       return user;
     }
     return null;
   }
 
   async login(user): Promise<{ access_token: string }> {
-    const payload = { username: user.username, sub: user.id };
+    console.log(user)
+    const payload = { role: user.role, username: user.username, sub: user.id };
     return {
       access_token: this.jwtService.sign(payload),
     };
