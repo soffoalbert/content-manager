@@ -1,8 +1,8 @@
-import { Inject, Injectable, RequestTimeoutException } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable, RequestTimeoutException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ClientProxy } from '@nestjs/microservices';
 import * as bcrypt from 'bcrypt';
-import { TimeoutError, catchError, throwError, timeout } from 'rxjs';
+import { TimeoutError, catchError, firstValueFrom, throwError, timeout } from 'rxjs';
 
 @Injectable()
 export class AuthenticationService {
@@ -12,23 +12,55 @@ export class AuthenticationService {
   ) { }
 
   async validateUser(username: string, password: string, role: string) {
-    const user = await this.client.send({ role: 'user', cmd: 'find' }, { username }).toPromise();
-    if (user && role === user.userType && (await this.comparePasswords(password, user.password))) {
-      return user;
+    try {
+      const user = await firstValueFrom(
+        this.client.send({ cmd: 'findUserByUsername' }, { username }).pipe(
+          timeout(5000),
+          catchError((error) => {
+            console.log(error.message)
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+          }),
+        ),
+      );
+
+      console.log({ ...user }, { role: role, password: password })
+      if (user && user.userType === role && (await this.comparePasswords(password, user.password))) {
+        return user;
+      }
+      return undefined;
+    } catch (error) {
+      throw new Error('Error validating this users credentials');
     }
-    return null;
   }
 
-  async login(user): Promise<{ access_token: string }> {
-    console.log(user)
-    const payload = { role: user.role, username: user.username, sub: user.id };
-    return {
-      access_token: this.jwtService.sign(payload),
-    };
+
+  isBcryptHash(input: string): boolean {
+    // Define a regular expression pattern to match bcrypt hashes
+    const bcryptHashPattern = /^\$2[ayb]\$.{56}$/;
+
+    return bcryptHashPattern.test(input);
   }
 
-  async comparePasswords(plainTextPassword: string, hashedPassword: string): Promise<boolean> {
-    return bcrypt.compare(plainTextPassword, hashedPassword);
+  async login(user: any): Promise<{ access_token: string }> {
+    try {
+      const res = await this.validateUser(user.username, user.password, user.userType)
+      if (res) {
+        const payload = { role: user.userType, username: user.username, sub: user.id };
+        return {
+          access_token: this.jwtService.sign(payload),
+        };
+      }
+      throw new UnauthorizedException('username, role or password incorrect')
+    } catch (error) {
+      throw new UnauthorizedException(error.message)
+    }
+  }
+
+  async comparePasswords(inputPassword: string, hashedPassword: string): Promise<boolean> {
+    if (this.isBcryptHash(inputPassword)) {
+      return inputPassword === hashedPassword
+    }
+    return bcrypt.compare(inputPassword, hashedPassword);
   }
 
   validateToken(jwt: string) {

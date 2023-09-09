@@ -5,7 +5,7 @@ export enum Role {
     CONTENT_CREATOR = 'CONTENT_CREATOR',
     CONTENT_REVIEWER = 'CONTENT_REVIEWER'
 }
-export class AdministratorGuard implements CanActivate {
+export class ContentReviewerGuard implements CanActivate {
     constructor(@Inject('AUTHENTICATION_SERVICE') private readonly client: ClientProxy) { }
 
     async canActivate(context: ExecutionContext): Promise<any> {
@@ -15,16 +15,15 @@ export class AdministratorGuard implements CanActivate {
             const res = await this.client.send(
                 { cmd: 'check' },
                 { jwt: req.headers['authorization']?.split(' ')[1] }).toPromise()
-
                 console.log(res)
 
-            if (res.role !== Role.ADMINISTRATOR) {
-                throw new UnauthorizedException('Only Administrators can perform this function')
-            }
-            console.log(res)
+            if (res.role === Role.CONTENT_CREATOR)  {
+                throw new UnauthorizedException('Only Administrators or content reviewers can perform this function')
+            } 
+            
             return res;
-        } catch (err: any) {
-            throw new UnauthorizedException('Only Administrators can perform this function')
+        } catch (err) {
+            throw new UnauthorizedException('Only Administrators or content reviewers can perform this function')
         }
     }
 }

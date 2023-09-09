@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, UnauthorizedException, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBadRequestResponse, ApiOperation, ApiParam, ApiResponse, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
 import { AuthenticationClient } from './user.client';
@@ -58,7 +58,11 @@ export class AuthenticationController {
     required: true,
   })
   async login(@Body() user: { username: string, password: string, role: string }) {
-    return this.authenticationClient.login(user)
+    try {
+      return await this.authenticationClient.login(user)
+    } catch (error) {
+      throw new UnauthorizedException(error.message)
+    }
   }
 
   @Post('register')

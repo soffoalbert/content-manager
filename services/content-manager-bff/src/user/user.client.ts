@@ -1,4 +1,4 @@
-import { Inject, Injectable, RequestTimeoutException } from '@nestjs/common';
+import { Inject, Injectable, RequestTimeoutException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ClientProxy } from '@nestjs/microservices';
 import * as bcrypt from 'bcrypt';
@@ -7,19 +7,23 @@ import { TimeoutError, catchError, firstValueFrom, throwError, timeout } from 'r
 @Injectable()
 export class AuthenticationClient {
   constructor(
-    @Inject('AUTHENTICATION_SERVICE') private readonly authClient: ClientProxy, @Inject('USER_SERVICE') private readonly userClient: ClientProxy ) { }
+    @Inject('AUTHENTICATION_SERVICE') private readonly authClient: ClientProxy, @Inject('USER_SERVICE') private readonly userClient: ClientProxy) { }
 
   async login(user): Promise<{ access_token: string }> {
-    const token = await firstValueFrom(
-      this.authClient.send({ cmd: 'login' }, { ...user }).pipe(
-        catchError((error) => {
-          // Handle errors here
-          console.error('Error login in:', error.message);
-          throw new Error('Unable to login');
-        }),
-      ),
-    );
-    return token;
+    console.log({ ...user })
+    try {
+      const token = await firstValueFrom(
+        this.authClient.send({ cmd: 'login' }, { ...user }).pipe(
+          catchError((error) => {
+            throw new Error(error.message);
+          }),
+        ),
+      );
+      return token;
+    } catch (error) {
+      throw new UnauthorizedException(error.message)
+    }
+
   }
 
   async register(user): Promise<{ access_token: string }> {

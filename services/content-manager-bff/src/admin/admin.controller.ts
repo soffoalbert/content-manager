@@ -12,24 +12,33 @@ export class AdministratorController {
   @Post('/create/user')
   @UseGuards(AdministratorGuard)
   async register(@Body() user: { username: string, password: string, userType: string, name: string, role: string }) {
-    return this.administratorClient.register(user)
+    try {
+      return this.administratorClient.register(user)
+    } catch (error) {
+      if (error.message == 'Username or email address is already taken.') {
+        throw new HttpException(error.message, HttpStatus.CONFLICT);
+      }
+      throw new HttpException(error.message, error.status)
+    }
   }
 
   @Get('/documents/pending')
   @UseGuards(AdministratorGuard)
   async findAllDocumentsInReview() {
-    return await this.administratorClient.getDocumentsInReview()
+    try {
+      return await this.administratorClient.getDocumentsInReview()
+    } catch (error) {
+      throw new HttpException(error.message, error.status)
+    }
   }
 
   @Post('/assign/review')
   @UseGuards(AdministratorGuard)
-
   async asignReviewer(@Body() content: { documentId: number, userId: string }, @Req() request: Request) {
     try {
       return await this.administratorClient.assignReviewer(content)
     } catch (error) {
-      console.log(error.message)
-      throw new HttpException(error.message, HttpStatus.CONFLICT)
+      throw new HttpException(error.message, error.status)
     }
   }
 
@@ -39,8 +48,7 @@ export class AdministratorController {
     try {
       return await this.administratorClient.initiate(documentId)
     } catch (error) {
-      console.log(error.message)
-      throw new HttpException(error.message, HttpStatus.CONFLICT)
+      throw new HttpException(error.message, error.status)
     }
   }
 }

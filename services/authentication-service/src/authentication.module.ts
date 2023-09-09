@@ -1,18 +1,57 @@
-import { Module, forwardRef } from '@nestjs/common';
+import { Module, UnauthorizedException, forwardRef } from '@nestjs/common';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthenticationController } from './authentication.controller';
 import { AuthenticationService } from './authentication.service';
-import { LocalStrategy } from './local.strategy';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ConfigurationService } from './configuration/configuration.service';
-import { ClientProxyFactory } from '@nestjs/microservices';
+import { ClientsModule, Transport } from '@nestjs/microservices';
+import { ConfigurationModule } from './configuration/configuration.module';
 
 @Module({
   controllers: [AuthenticationController],
   exports: [AuthenticationService],
   imports: [
     PassportModule,
+    ClientsModule.registerAsync([
+      {
+        name: 'USER_SERVICE',
+        imports: [ConfigurationModule],
+        inject: [ConfigurationService],
+        useFactory: (configService: ConfigurationService) => {
+          const userServiceOptions = configService.userServiceOptions;
+          if (!userServiceOptions) {
+            throw new UnauthorizedException('USER_SERVICE options not found');
+          }
+          return {
+            transport: Transport.TCP,
+            options: {
+              port: 3002,
+              host: 'localhost'
+            }
+           
+          };
+        },
+      },
+      {
+        name: 'AUTHENTICATION_SERVICE',
+        imports: [ConfigurationModule],
+        inject: [ConfigurationService],
+        useFactory: (configService: ConfigurationService) => {
+          // const authServiceOptions = configService.authenticationServiceOptions;
+          // if (!authServiceOptions) {
+          //   throw new UnauthorizedException('AUTHENTICATION_SERVICE options not found');
+          // }
+          return {
+            transport: Transport.TCP,
+            options: {
+              port: 3001,
+              host: 'localhost'
+            }
+          };
+        },
+      },
+    ]),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -25,16 +64,7 @@ import { ClientProxyFactory } from '@nestjs/microservices';
     }),
   ],
   providers: [
-    {
-      provide: 'USER_SERVICE',
-      useFactory: (configService: ConfigurationService) => {
-        const userServiceOptions = configService.userServiceOptions;
-        return ClientProxyFactory.create(userServiceOptions);
-      },
-      inject: [ConfigurationService],
-    },
     AuthenticationService,
-    LocalStrategy,
     ConfigurationService,
     ConfigService
    ],

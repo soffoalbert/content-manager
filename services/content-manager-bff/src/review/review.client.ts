@@ -9,10 +9,6 @@ export class ReviewClient {
     @Inject('REVIEW_SERVICE') private readonly reviewClient: ClientProxy,
   ) { }
 
-  async send(review, token): Promise<any> {
-    return await this.reviewClient.send({ cmd: 'submit' }, { ...review, token }).toPromise();
-  }
-
   async review(review): Promise<any> {
     try {
       return await firstValueFrom(

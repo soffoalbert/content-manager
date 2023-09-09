@@ -1,7 +1,7 @@
 import { Controller, UseGuards } from '@nestjs/common';
 import { AuthenticationService } from './authentication.service';
-import { MessagePattern, Payload } from '@nestjs/microservices';
-import { LocalStrategy } from './local.strategy';
+import { MessagePattern, Payload, RpcException } from '@nestjs/microservices';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller()
 export class AuthenticationController {
@@ -9,11 +9,19 @@ export class AuthenticationController {
 
   @MessagePattern({ cmd: 'login' })
   async login(@Payload() payload: any): Promise<{ access_token: string }> {
-    return this.authService.login(payload);
+    try {
+      return await this.authService.login(payload);
+    } catch (error) {
+      throw new RpcException(error.message)
+    }
   }
 
   @MessagePattern({ cmd: 'check' })
   async isLogedin(@Payload() payload: any): Promise<{ access_token: string }> {
-    return this.authService.validateToken(payload.jwt);
+    try {
+      return await this.authService.validateToken(payload.jwt);
+    } catch (error) {
+      throw new RpcException(error.message)
+    }
   }
 }

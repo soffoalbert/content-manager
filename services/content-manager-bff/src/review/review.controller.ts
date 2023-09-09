@@ -4,20 +4,15 @@ import { AuthorizationGuard } from 'src/authentication.guard';
 import { ReviewAuthorizationGuard } from './review.auth.guard';
 import { Request, Response } from 'express';
 import { RpcException } from '@nestjs/microservices';
+import { ContentReviewerGuard } from './reviewer.guard';
 
 
 @Controller('review')
 export class ReviewController {
     constructor(private readonly reviewClient: ReviewClient) { }
 
-    @Post('submit')
-    @UseGuards(AuthorizationGuard)
-    async submit(@Body() content: { documentId: number, userId: string }, @Req() request: Request) {
-        return this.reviewClient.send(content, request.headers['authorization']?.split(' ')[1])
-    }
-
     @Get()
-    @UseGuards(ReviewAuthorizationGuard)
+    @UseGuards(ContentReviewerGuard)
     async review(@Query('documentId') documentId: number, @Query('userId') userId: number, @Query('approval') approval: string, @Res() res: Response) {
         try {
 

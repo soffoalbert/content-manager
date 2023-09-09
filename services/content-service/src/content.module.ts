@@ -26,8 +26,8 @@ import { S3 } from 'aws-sdk';
   providers: [{
     provide: 'S3',
     useValue: new S3({
-      accessKeyId: '',
-      secretAccessKey: '',
+      accessKeyId: 'AKIAZOCTBKYKDJQIMB24',
+      secretAccessKey: '5YKU58ScVmCw4u+dPQiSvK44uqwugXZXjStrbR2C',
       region: 'eu-central-1', // Change to your desired region
     }),
   }, ContentService],
