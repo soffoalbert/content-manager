@@ -1,49 +1,57 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { ClientOptions, MicroserviceOptions, Transport } from '@nestjs/microservices';
+import { ClientOptions, RmqOptions, TcpClientOptions, Transport } from '@nestjs/microservices';
 
 @Injectable()
 export class ConfigurationService {
-    private readonly _userServiceOptions!: ClientOptions;
-    private readonly _authenticationServiceOptions!: ClientOptions;
+  private readonly _userServiceOptions: TcpClientOptions;
+  private readonly _contentServiceOptions: TcpClientOptions;
+  private readonly _notificationServiceOptions: RmqOptions;
 
-    private readonly _env!: string;
+  get userServiceOptions(): TcpClientOptions {
+    return this._userServiceOptions;
+  }
 
-  
-    get userServiceOptions(): ClientOptions {
-      return this._userServiceOptions;
-    }
+  get contentServiceOptions(): TcpClientOptions {
+    return this._contentServiceOptions;
+  }
 
-    get authenticationServiceOptions(): ClientOptions {
-      return this._authenticationServiceOptions;
-    }
+  get notificationServiceOptions(): RmqOptions {
+    return this._notificationServiceOptions;
+  }
 
-    get env(): string {
-      return this._env;
-    }
-    
-    constructor(private readonly _configService: ConfigService) {
-      this._userServiceOptions = this._getUserServiceOptions();
-      this._authenticationServiceOptions = this._getAuthenticationServiceOptions();
+  constructor(private readonly _configService: ConfigService) {
+    this._userServiceOptions = this._getUserServiceOptions();
+    this._contentServiceOptions = this._getContentServiceOptions();
+    this._notificationServiceOptions = this._getNotificationServiceOptions();
+  }
 
-    }
-  
-    private _getUserServiceOptions(): ClientOptions {
-      const options = {
-        transport: Transport.TCP,
+  private _getUserServiceOptions(): TcpClientOptions {
+    return {
+      transport: Transport.TCP,
+      options: {
         host: this._configService.get<string>('USER_SERVICE_HOST'),
-        port: this._configService.get<string>('USER_SERVICE_PORT'),
-      } as ClientOptions
-      return options
-    }
+        port: parseInt(this._configService.get<string>('USER_SERVICE_PORT'), 10),
+      },
+    };
+  }
 
-      
-    private _getAuthenticationServiceOptions(): ClientOptions {
-      const options = {
-        transport: Transport.TCP,
-        host: this._configService.get<string>('AUTHENTICATION_SERVICE_HOST'),
-        port: this._configService.get<string>('AUTHENTICATION_SERVICE_PORT'),
-      } as ClientOptions
-      return options
-    }
+  private _getContentServiceOptions(): TcpClientOptions {
+    return {
+      transport: Transport.TCP,
+      options: {
+        host: this._configService.get<string>('CONTENT_SERVICE_HOST'),
+        port: parseInt(this._configService.get<string>('CONTENT_SERVICE_PORT'), 10),
+      },
+    };
+  }
+
+  private _getNotificationServiceOptions(): RmqOptions {
+    return {
+      transport: Transport.RMQ,
+      options: {
+        urls: [this._configService.get<string>('NOTIFICATION_SERVICE_URL')],
+      },
+    };
+  }
 }

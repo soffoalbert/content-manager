@@ -48,8 +48,8 @@ import { JwtModule } from '@nestjs/jwt';
         return {
           transport: Transport.TCP,
           options: {
-            port: 3002,
-            host: 'localhost'
+            port: userServiceOptions.options.port,
+            host: userServiceOptions.options.host
           }
          
         };
@@ -60,14 +60,14 @@ import { JwtModule } from '@nestjs/jwt';
       imports: [ConfigurationModule],
       inject: [ConfigurationService],
       useFactory: (configService: ConfigurationService) => {
-        const authServiceOptions = configService.authenticationServiceOptions;
-        if (!authServiceOptions) {
+        const notificationServiceOptions = configService.notificationServiceOptions;
+        if (!notificationServiceOptions) {
           throw new UnauthorizedException('NOTIFICATION_SERVICE options not found');
         }
         return {
           transport: Transport.RMQ,
           options: {
-            urls: ['amqp://user:bitnami@localhost:5672/'], // Replace username and password
+            urls: notificationServiceOptions.options.urls,
             queue: 'notification_queue',
             queueOptions: {
               durable: false,
@@ -81,15 +81,15 @@ import { JwtModule } from '@nestjs/jwt';
       imports: [ConfigurationModule],
       inject: [ConfigurationService],
       useFactory: (configService: ConfigurationService) => {
-        const authServiceOptions = configService.authenticationServiceOptions;
-        if (!authServiceOptions) {
+        const contentServiceOptions = configService.contentServiceOptions;
+        if (!contentServiceOptions) {
           throw new UnauthorizedException('CONTENT_SERVICE options not found');
         }
         return {
           transport: Transport.TCP,
           options: {
-            port: 3003,
-            host: 'localhost'
+            port: contentServiceOptions.options.port,
+            host: contentServiceOptions.options.host
           }
         };
       },
