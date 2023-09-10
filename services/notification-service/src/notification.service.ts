@@ -1,11 +1,13 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+
 import * as nodemailer from 'nodemailer';
 import { createWriteStream } from 'fs';
 import { RpcException } from '@nestjs/microservices';
 
 @Injectable()
 export class NotificationService {
-  constructor() {}
+  constructor(private readonly configService: ConfigService) {}
 
   async sendMail(data: any): Promise<string> {
     const approveBtn = `https://0016-2a02-a211-8ec1-3b80-974-4132-ed86-493a.ngrok-free.app/review?approval=approved&documentId=${data.documentId}&userId=${data.userId}&token=${data.token}`;
@@ -16,19 +18,18 @@ export class NotificationService {
 
     console.log(data);
 
-    // Create a transporter using nodemailer
     const transporter = nodemailer.createTransport({
-      service: 'Gmail', // E.g., 'Gmail', 'SendGrid', etc.
+      service: 'Gmail',
       auth: {
-        user: 'o91486830@gmail.com', // Your email address
-        pass: 'hfsqmdughxxfbzyl',
+        user: this.configService.get('AUTH_EMAIL_ACCOUNT_ADDRESS'),
+        pass: this.configService.get('AUTH_EMAIL_ACCOUNT_PASSWORD'),
       },
     });
 
     try {
       // Define the email content
       const mailOptions = {
-        from: 'o91486830@gmail.com',
+        from: this.configService.get('AUTH_EMAIL_ACCOUNT_ADDRESS'),
         to: data.user.emailAddress,
         subject: 'New Document For Review from the CMS',
         html: `
@@ -172,7 +173,8 @@ export class NotificationService {
         `,
       };
 
-      // Send the email
+      console.log('Email sending...');
+
       const info = await transporter.sendMail(mailOptions);
       console.log('Email sent successfully');
       return 'res';

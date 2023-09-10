@@ -2,11 +2,9 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 export const swaggerConfig = (app) => {
   const options = new DocumentBuilder()
-    .setTitle('User Management API')
-    .setDescription('This API is used for user registration and authentication')
+    .setTitle('Content Review And Approval REST API')
+    .setDescription('This REST API is used for reviewing and approving/rejecting content')
     .setVersion('1.0')
-    .addTag('Authentication')
-    .addTag('User')
     .addBearerAuth()
     .build();
 

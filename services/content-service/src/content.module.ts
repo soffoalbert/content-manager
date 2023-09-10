@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { ContentController } from './content.controller';
 import { ContentService } from './content.service';
 import * as Joi from '@hapi/joi';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { DatabaseModule } from './database/database.module';
 import { Content } from './content.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -23,13 +23,19 @@ import { S3 } from 'aws-sdk';
     DatabaseModule
   ],
   controllers: [ContentController],
-  providers: [{
-    provide: 'S3',
-    useValue: new S3({
-      accessKeyId: '',
-      secretAccessKey: '',
-      region: 'eu-central-1', // Change to your desired region
-    }),
-  }, ContentService],
+  providers: [
+    {
+      provide: 'S3',
+      useFactory: (configurationService: ConfigService) => {
+        const s3Config = new S3({
+          accessKeyId: configurationService.get('S3_ACCESS_KEY_ID'),
+          secretAccessKey: configurationService.get('S3_SECRET_ACCESS_KEY'),
+          region: configurationService.get('S3_REGION', 'eu-central-1'),
+        });
+        return s3Config;
+      }, inject: [ConfigService]
+    },
+    ContentService,
+  ],
 })
 export class ContentModule { }

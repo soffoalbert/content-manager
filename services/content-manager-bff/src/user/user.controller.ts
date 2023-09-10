@@ -11,7 +11,6 @@ import {
   ApiProperty,
 } from '@nestjs/swagger';
 import { AuthenticationClient } from './user.client';
-import { AuthorizationGuard } from 'src/authentication.guard';
 
 export class LoginDto {
   @ApiProperty({ description: 'The username of the user', example: 'john_doe' })
@@ -22,7 +21,6 @@ export class LoginDto {
 
   @ApiProperty({ description: 'The type of user', example: 'CONTENT_CREATOR' })
   userType: string;
-
 }
 
 @Controller('auth')

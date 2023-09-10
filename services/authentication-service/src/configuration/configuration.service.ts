@@ -1,16 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { ClientOptions, MicroserviceOptions, Transport } from '@nestjs/microservices';
+import { ClientOptions, MicroserviceOptions, TcpClientOptions, Transport } from '@nestjs/microservices';
 
 @Injectable()
 export class ConfigurationService {
-    private readonly _userServiceOptions!: ClientOptions;
+    private readonly _userServiceOptions!: TcpClientOptions;
     private readonly _env!: string;
     private readonly _JWTSecret!: string;
     private readonly _JWTEpirationDuration!: string;
 
   
-    get userServiceOptions(): ClientOptions {
+    get userServiceOptions(): TcpClientOptions {
       return this._userServiceOptions;
     }
 
@@ -28,6 +28,8 @@ export class ConfigurationService {
     
     constructor(private readonly _configService: ConfigService) {
       this._userServiceOptions = this._getUserServiceOptions();
+      this._JWTSecret = this._getJWTSecret()
+      this._JWTEpirationDuration = this._getJWTEpirationDuration()
     }
 
     private _getJWTSecret() {
@@ -38,12 +40,13 @@ export class ConfigurationService {
       return this._configService.get<string>('JWT_EXPIRATION_DURATION')
     }
   
-    private _getUserServiceOptions(): ClientOptions {
-      const options = {
+    private _getUserServiceOptions(): TcpClientOptions {
+      return {
         transport: Transport.TCP,
-        host: this._configService.get<string>('USER_SERVICE_HOST'),
-        port: this._configService.get<string>('USER_SERVICE_PORT'),
-      } as ClientOptions
-      return options
+        options: {
+          host: this._configService.get<string>('USER_SERVICE_HOST'),
+          port: parseInt(this._configService.get<string>('USER_SERVICE_PORT'), 10),
+        },
+      };
     }
 }

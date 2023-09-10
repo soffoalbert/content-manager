@@ -26,39 +26,21 @@ import { ConfigurationModule } from './configuration/configuration.module';
           return {
             transport: Transport.TCP,
             options: {
-              port: 3002,
-              host: 'localhost'
+              port: userServiceOptions.options.port,
+              host: userServiceOptions.options.host
             }
            
           };
         },
       },
-      {
-        name: 'AUTHENTICATION_SERVICE',
-        imports: [ConfigurationModule],
-        inject: [ConfigurationService],
-        useFactory: (configService: ConfigurationService) => {
-          // const authServiceOptions = configService.authenticationServiceOptions;
-          // if (!authServiceOptions) {
-          //   throw new UnauthorizedException('AUTHENTICATION_SERVICE options not found');
-          // }
-          return {
-            transport: Transport.TCP,
-            options: {
-              port: 3001,
-              host: 'localhost'
-            }
-          };
-        },
-      },
     ]),
     JwtModule.registerAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({ 
-        secret: configService.get('JWT_SECRET', 'test-secret'),
+      imports: [ConfigurationModule],
+      inject: [ConfigurationService],
+      useFactory: (configService: ConfigurationService) => ({ 
+        secret: configService.JWTSecret,
         signOptions: {
-          expiresIn: configService.get('JWT_EXPIRE_IN', '100h'),
+          expiresIn: configService.JWTEpirationDuration,
         },
       }),
     }),
