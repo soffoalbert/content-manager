@@ -26,17 +26,16 @@ import { JwtModule } from "@nestjs/jwt";
                 imports: [ConfigurationModule],
                 inject: [ConfigurationService],
                 useFactory: (configService: ConfigurationService) => {
-                    const userServiceOptions = configService.userServiceOptions;
-                    if (!userServiceOptions) {
-                        throw new UnauthorizedException('USER_SERVICE options not found');
+                    const contentServiceOptions = configService.contentServiceOptions;
+                    if (!contentServiceOptions) {
+                        throw new UnauthorizedException('CONTENT_SERVICE options not found');
                     }
-                    return { // TODO: CHANGE THIS TO READ FROM CONFIG
+                    return {
                         transport: Transport.TCP,
                         options: {
-                            port: 3003,
-                            host: 'localhost'
+                            port: contentServiceOptions.options.port,
+                            host: contentServiceOptions.options.host
                         }
-
                     };
                 },
             },
@@ -49,11 +48,11 @@ import { JwtModule } from "@nestjs/jwt";
                     if (!authServiceOptions) {
                         throw new UnauthorizedException('AUTHENTICATION_SERVICE options not found');
                     }
-                    return { // TODO: CHANGE THIS TO READ FROM CONFIG
+                    return {
                         transport: Transport.TCP,
                         options: {
-                            port: 3001,
-                            host: 'localhost'
+                            port: authServiceOptions.options.port,
+                            host: authServiceOptions.options.host
                         }
                     };
                 },

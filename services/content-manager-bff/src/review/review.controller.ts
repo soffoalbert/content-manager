@@ -5,7 +5,7 @@ import { ReviewAuthorizationGuard } from './review.auth.guard';
 import { Request, Response } from 'express';
 import { RpcException } from '@nestjs/microservices';
 import { ContentReviewerGuard } from './reviewer.guard';
-import { ApiBearerAuth, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiExcludeEndpoint, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 @Controller('review')
 @ApiTags('Review')
@@ -45,6 +45,7 @@ export class ReviewController {
 
 
     @Get('rejected')
+    @ApiExcludeEndpoint()
     reject(@Res() res: Response) {
         res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
 
@@ -107,6 +108,7 @@ export class ReviewController {
     }
 
     @Get('voted')
+    @ApiExcludeEndpoint()
     voted(@Res() res: Response) {
         res.status(200).send(`<!DOCTYPE html>
         <html lang="en">
@@ -164,7 +166,8 @@ export class ReviewController {
     }
 
     @Get('approved')
-    async approve(@Res() res: Response) {
+    @ApiExcludeEndpoint()
+    approve(@Res() res: Response) {
         // Send an HTML response directly
         res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
 

@@ -33,8 +33,8 @@ import { JwtModule } from "@nestjs/jwt";
           return {
             transport: Transport.TCP,
             options: {
-              port: 3002,
-              host: 'localhost'
+              port: userServiceOptions.options.port,
+              host: userServiceOptions.options.host
             }
            
           };
@@ -52,8 +52,8 @@ import { JwtModule } from "@nestjs/jwt";
           return {
             transport: Transport.TCP,
             options: {
-              port: 3001,
-              host: 'localhost'
+              port: authServiceOptions.options.port,
+              host: authServiceOptions.options.host
             }
           };
         },

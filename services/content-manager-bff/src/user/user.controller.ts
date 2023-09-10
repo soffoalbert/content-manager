@@ -8,14 +8,21 @@ import {
   ApiUnauthorizedResponse,
   ApiBody,
   ApiParam,
+  ApiProperty,
 } from '@nestjs/swagger';
 import { AuthenticationClient } from './user.client';
 import { AuthorizationGuard } from 'src/authentication.guard';
 
 export class LoginDto {
-  username: string
-  password: string
-  userType: string
+  @ApiProperty({ description: 'The username of the user', example: 'john_doe' })
+  username: string;
+
+  @ApiProperty({ description: 'The password of the user', example: 'password123' })
+  password: string;
+
+  @ApiProperty({ description: 'The type of user', example: 'CONTENT_CREATOR' })
+  userType: string;
+
 }
 
 @Controller('auth')
@@ -63,7 +70,7 @@ export class AuthenticationController {
   })
   @ApiBody({
     description: 'Login credentials',
-    type: LoginDto, // Define a DTO for your login payload
+    type: LoginDto,
   })
   async login(@Body() loginDto: LoginDto) {
     try {

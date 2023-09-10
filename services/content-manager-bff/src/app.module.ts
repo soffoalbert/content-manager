@@ -13,13 +13,17 @@ import { AdministratorModule } from './admin/admin.module';
       USER_SERVICE_PORT: Joi.number().required(),
       AUTHENTICATION_SERVICE_HOST: Joi.string().required(),
       AUTHENTICATION_SERVICE_PORT: Joi.number().required(),
+      CONTENT_SERVICE_HOST: Joi.string().required(),
+      CONTENT_SERVICE_PORT: Joi.number().required(),
+      REVIEW_SERVICE_HOST: Joi.string().required(),
+      REVIEW_SERVICE_PORT: Joi.number().required(),
     }),
   }),
-  UserModule,
-  ContentModule,
-  ReviewModule,
-  AdministratorModule
-],
+    UserModule,
+    ContentModule,
+    ReviewModule,
+    AdministratorModule
+  ],
 })
 export class AppModule {
 }

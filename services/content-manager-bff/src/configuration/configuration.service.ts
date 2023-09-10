@@ -1,49 +1,75 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { ClientOptions, MicroserviceOptions, Transport } from '@nestjs/microservices';
+import { ClientOptions, TcpClientOptions, Transport } from '@nestjs/microservices';
 
 @Injectable()
 export class ConfigurationService {
-    private readonly _userServiceOptions!: ClientOptions;
-    private readonly _authenticationServiceOptions!: ClientOptions;
+  private readonly _userServiceOptions: TcpClientOptions;
+  private readonly _authenticationServiceOptions: TcpClientOptions;
+  private readonly _contentServiceOptions: TcpClientOptions;
+  private readonly _reviewServiceOptions: TcpClientOptions;
+  private readonly _env: string;
 
-    private readonly _env!: string;
+  get userServiceOptions(): TcpClientOptions {
+    return this._userServiceOptions;
+  }
 
-  
-    get userServiceOptions(): ClientOptions {
-      return this._userServiceOptions;
-    }
+  get authenticationServiceOptions(): TcpClientOptions {
+    return this._authenticationServiceOptions;
+  }
 
-    get authenticationServiceOptions(): ClientOptions {
-      return this._authenticationServiceOptions;
-    }
+  get contentServiceOptions(): TcpClientOptions {
+    return this._contentServiceOptions;
+  }
 
-    get env(): string {
-      return this._env;
-    }
-    
-    constructor(private readonly _configService: ConfigService) {
-      this._userServiceOptions = this._getUserServiceOptions();
-      this._authenticationServiceOptions = this._getAuthenticationServiceOptions();
+  get reviewServiceOptions(): TcpClientOptions {
+    return this._reviewServiceOptions;
+  }
 
-    }
-  
-    private _getUserServiceOptions(): ClientOptions {
-      const options = {
-        transport: Transport.TCP,
+  constructor(private readonly _configService: ConfigService) {
+    this._userServiceOptions = this._getUserServiceOptions();
+    this._authenticationServiceOptions = this._getAuthenticationServiceOptions();
+    this._contentServiceOptions = this._getContentServiceOptions();
+    this._reviewServiceOptions = this._getReviewServiceOptions();
+  }
+
+  private _getUserServiceOptions(): TcpClientOptions {
+    return {
+      transport: Transport.TCP,
+      options: {
         host: this._configService.get<string>('USER_SERVICE_HOST'),
-        port: this._configService.get<string>('USER_SERVICE_PORT'),
-      } as ClientOptions
-      return options
-    }
+        port: parseInt(this._configService.get<string>('USER_SERVICE_PORT'), 10),
+      },
+    };
+  }
 
-      
-    private _getAuthenticationServiceOptions(): ClientOptions {
-      const options = {
-        transport: Transport.TCP,
+  private _getContentServiceOptions(): TcpClientOptions {
+    return {
+      transport: Transport.TCP,
+      options: {
+        host: this._configService.get<string>('CONTENT_SERVICE_HOST'),
+        port: parseInt(this._configService.get<string>('CONTENT_SERVICE_PORT'), 10),
+      },
+    };
+  }
+
+  private _getReviewServiceOptions(): TcpClientOptions {
+    return {
+      transport: Transport.TCP,
+      options: {
+        host: this._configService.get<string>('REVIEW_SERVICE_HOST'),
+        port: parseInt(this._configService.get<string>('REVIEW_SERVICE_PORT'), 10),
+      },
+    };
+  }
+
+  private _getAuthenticationServiceOptions(): TcpClientOptions {
+    return {
+      transport: Transport.TCP,
+      options: {
         host: this._configService.get<string>('AUTHENTICATION_SERVICE_HOST'),
-        port: this._configService.get<string>('AUTHENTICATION_SERVICE_PORT'),
-      } as ClientOptions
-      return options
-    }
+        port: parseInt(this._configService.get<string>('AUTHENTICATION_SERVICE_PORT'), 10),
+      },
+    };
+  }
 }
