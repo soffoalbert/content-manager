@@ -25,7 +25,7 @@ export class ContentClient {
   }
 
   async onApplicationBootstrap() {
-    await this.contentServiceClient.connect();
+    // await this.contentServiceClient.connect();
     console.log('connected')
   }
 }

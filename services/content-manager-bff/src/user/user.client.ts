@@ -32,9 +32,8 @@ export class AuthenticationClient {
   }
 
   async onApplicationBootstrap() {
-    await this.authClient.connect();
+    // await this.authClient.connect();
     console.log('connected')
-
   }
 }
 

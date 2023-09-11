@@ -1,8 +1,130 @@
 version: '2'
 
+networks:
+  test:
+    driver: bridge
+
 services:
+  content-manager-bff:
+    build:
+      context: ./services/content-manager-bff
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - authentication-service
+      - notification-service
+      - review-service
+      - user-service
+      - content-service
+    links:
+      - authentication-service
+      - content-service
+      - notification-service
+      - review-service
+      - user-service
+    networks:
+      - test
+
+  authentication-service:
+    build:
+      context: ./services/authentication-service
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    depends_on:
+      - user-service
+    links:
+      - user-service
+    networks:
+      - test
+
+  content-service:
+    build:
+      context: ./services/content-service
+      dockerfile: Dockerfile
+    ports:
+      - "3003:3003"
+    links:
+      - content-db
+    networks:
+      - test
+
+  notification-service:
+    build:
+      context: ./services/notification-service
+      dockerfile: Dockerfile
+    ports:
+      - "3005:3005"
+    depends_on:
+      - rabbitmq
+    links:
+      - rabbitmq
+    networks:
+      - test
+  review-service:
+    build:
+      context: ./services/review-service
+      dockerfile: Dockerfile
+    ports:
+      - "3004:3004"
+    depends_on:
+      - user-service
+      - content-service
+      - notification-service
+    links:
+      - review-db
+      - user-service
+      - content-service
+      - notification-service
+    networks:
+      - test
+
+  user-service:
+    build:
+      context: ./services/user-service
+      dockerfile: Dockerfile
+    ports:
+      - "3002:3002"
+    links:
+      - user-db
+    networks:
+      - test
+  user-db:
+    image: postgres:latest
+    command: ["-p", "5435"]
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: 198920
+      POSTGRES_DB: user-db
+    ports:
+      - "5435:5435"
+    networks:
+      - test
+  content-db:
+    image: postgres:latest
+    command: ["-p", "5433"]
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: 198920
+      POSTGRES_DB: content-db
+    ports:
+      - "5433:5433"
+    networks:
+      - test
+  review-db:
+    image: postgres:latest
+    command: ["-p", "5436"]
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: 198920
+      POSTGRES_DB: review-db
+    ports:
+      - "5436:5436"
+    networks:
+      - test
   rabbitmq:
-    image: docker.io/bitnami/rabbitmq:3.12
+    image: bitnami/rabbitmq:3.12
     ports:
       - '4369:4369'
       - '5551:5551'
@@ -17,6 +139,8 @@ services:
       - RABBITMQ_LOGS=-
     volumes:
       - 'rabbitmq_data:/bitnami/rabbitmq/mnesia'
+    networks:
+      - test
 volumes:
   rabbitmq_data:
     driver: local

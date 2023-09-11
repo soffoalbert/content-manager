@@ -123,4 +123,11 @@ export class AdministratorClient {
       catchErrorAndThrow('Error assigning reviewer', error);
     }
   }
+
+  async onApplicationBootstrap() {
+    // await this.authClient.connect();
+    // await this.reviewClient.connect();
+    // await this.userClient.connect();
+    console.log('connected')
+  }
 }

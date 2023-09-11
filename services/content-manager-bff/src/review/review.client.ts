@@ -34,7 +34,7 @@ export class ReviewClient {
   }
 
   async onApplicationBootstrap() {
-    await this.reviewClient.connect();
+    // await this.reviewClient.connect();
     console.log('Connected');
   }
 }
