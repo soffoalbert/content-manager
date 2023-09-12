@@ -1,7 +1,6 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
 import { AuthenticationService } from './authentication.service';
 import { MessagePattern, Payload, RpcException } from '@nestjs/microservices';
-import { AuthGuard } from '@nestjs/passport';
 
 @Controller()
 export class AuthenticationController {

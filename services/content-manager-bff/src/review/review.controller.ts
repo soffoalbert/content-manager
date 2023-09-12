@@ -13,7 +13,7 @@ export class ReviewController {
     constructor(private readonly reviewClient: ReviewClient) { }
 
     @Get()
-    @UseGuards(ContentReviewerGuard)
+    // @UseGuards(ContentReviewerGuard)
     @ApiOperation({ summary: 'Review content' })
     @ApiQuery({ name: 'documentId', type: 'number', required: true })
     @ApiQuery({ name: 'userId', type: 'number', required: true })
@@ -25,10 +25,11 @@ export class ReviewController {
         @Query('documentId') documentId: number,
         @Query('userId') userId: number,
         @Query('approval') approval: string,
+        @Query('token') token: string,
         @Res() res: Response,
     ) {
         try {
-            const review = await this.reviewClient.review({ documentId, userId, approval });
+            const review = await this.reviewClient.review({ documentId, userId, approval, token });
             console.log(review)
             if (review.approval === 'rejected') {
                 res.redirect('review/rejected');

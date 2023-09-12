@@ -7,9 +7,15 @@ export class ConfigurationService {
   private readonly _userServiceOptions: TcpClientOptions;
   private readonly _contentServiceOptions: TcpClientOptions;
   private readonly _notificationServiceOptions: RmqOptions;
+  private readonly _authenticationServiceOptions: TcpClientOptions;
+
 
   get userServiceOptions(): TcpClientOptions {
     return this._userServiceOptions;
+  }
+
+  get authenticationServiceOptions(): TcpClientOptions {
+    return this._authenticationServiceOptions;
   }
 
   get contentServiceOptions(): TcpClientOptions {
@@ -24,6 +30,8 @@ export class ConfigurationService {
     this._userServiceOptions = this._getUserServiceOptions();
     this._contentServiceOptions = this._getContentServiceOptions();
     this._notificationServiceOptions = this._getNotificationServiceOptions();
+    this._authenticationServiceOptions = this._getAuthenticationServiceOptions();
+
   }
 
   private _getUserServiceOptions(): TcpClientOptions {
@@ -51,6 +59,16 @@ export class ConfigurationService {
       transport: Transport.RMQ,
       options: {
         urls: [this._configService.get<string>('NOTIFICATION_SERVICE_URL')],
+      },
+    };
+  }
+
+  private _getAuthenticationServiceOptions(): TcpClientOptions {
+    return {
+      transport: Transport.TCP,
+      options: {
+        host: this._configService.get<string>('AUTHENTICATION_SERVICE_HOST'),
+        port: parseInt(this._configService.get<string>('AUTHENTICATION_SERVICE_PORT'), 10),
       },
     };
   }

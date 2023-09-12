@@ -13,13 +13,13 @@ import {
 import { AuthenticationClient } from './user.client';
 
 export class LoginDto {
-  @ApiProperty({ description: 'The username of the user', example: 'john_doe' })
+  @ApiProperty({ description: 'The username of the user', example: 'oneshot' })
   username: string;
 
-  @ApiProperty({ description: 'The password of the user', example: 'password123' })
+  @ApiProperty({ description: 'The password of the user', example: 'oneshot' })
   password: string;
 
-  @ApiProperty({ description: 'The type of user', example: 'CONTENT_CREATOR' })
+  @ApiProperty({ description: 'The type of user', example: 'ADMINISTRATOR' })
   userType: string;
 }
 

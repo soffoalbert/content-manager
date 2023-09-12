@@ -22,7 +22,7 @@ export class ContentController {
       type: 'object',
       properties: {
         file: {
-          type: 'string',
+          type: 'file',
           format: 'binary',
         },
       },

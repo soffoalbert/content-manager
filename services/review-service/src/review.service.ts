@@ -12,6 +12,9 @@ export class ReviewService {
     @Inject('USER_SERVICE') private readonly userServiceClient: ClientProxy,
     @Inject('CONTENT_SERVICE') private readonly contentServiceClient: ClientProxy,
     @Inject('NOTIFICATION_SERVICE') private readonly notificationServiceClient: ClientProxy,
+    @Inject('AUTHENTICATION_SERVICE') private readonly authServiceClient: ClientProxy,
+
+    
   ) { }
 
   async submitForReview(review): Promise<any> {
@@ -37,24 +40,44 @@ export class ReviewService {
     }
   }
 
+  async login(user): Promise<{ access_token: string }> {
+    console.log({ ...user })
+    try {
+      const token = await firstValueFrom(
+        this.authServiceClient.send({ cmd: 'login' }, { ...user }).pipe(
+          catchError((error) => {
+            throw new RpcException(error.message);
+          }),
+        ),
+      );
+      return token;
+    } catch (error) {
+      throw new RpcException(error.message);
+    }
+  }
+
   async initiate(documentId): Promise<any> {
     try {
       const storedReviews = await this.reviewRepository.find({ where: { documentId, approval: ReviewStatus.Pending } });
 
+      console.log(storedReviews)
       storedReviews.forEach(async (review) => {
-         const user =  await this.getUser(review.userId)
-         const document = await this.getDocument(review.documentId);
-   
-         const notification = await this.notifyUser({
-           ...review,
-           user: { ...user },
-           fileUrl: document.fileUrl,
-           fileName: document.fileName,
-           submittedAt: document.createdAt,
-         });
-       })
-   
-       return storedReviews
+        const user = await this.getUser(review.userId)
+        const document = await this.getDocument(review.documentId);
+        const token = await this.login(user)
+        console.log(user)
+        console.log(document)
+        const notification = await this.notifyUser({
+          ...review,
+          user: { ...user },
+          fileUrl: document.fileUrl,
+          fileName: document.fileName,
+          submittedAt: document.createdAt,
+          token: token.access_token
+        });
+      })
+
+      return storedReviews
     } catch (error) {
       throw new RpcException(error.message);
     }
@@ -161,7 +184,7 @@ export class ReviewService {
       const notification = await firstValueFrom(
         this.notificationServiceClient.send({ cmd: 'notifyByEmail' }, data).pipe(
           catchError((error) => {
-            console.error('Error notifying user:', error.message);
+            console.error('Error notifying user:', error);
             throw new Error('Unable to notify user');
           }),
         ),

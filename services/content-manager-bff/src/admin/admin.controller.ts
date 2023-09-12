@@ -9,17 +9,23 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Schemas } from 'aws-sdk';
 
 export class UserDTO {
+  @ApiProperty({ description: 'The name of the user', example: 'John Doe' })
+  name: string;
+  
   @ApiProperty({ description: 'The username of the user', example: 'john_doe' })
   username: string;
 
+  
   @ApiProperty({ description: 'The password of the user', example: 'password123' })
   password: string;
+
+  @ApiProperty({ description: 'The emailAddress of the user', example: 'sofoalbert123@gmail.com' })
+  emailAddress: string;
 
   @ApiProperty({ description: 'The type of user', example: 'CONTENT_CREATOR' })
   userType: string;
 
-  @ApiProperty({ description: 'The name of the user', example: 'John Doe' })
-  name: string;
+
 }
 
 

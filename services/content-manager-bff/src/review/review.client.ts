@@ -7,24 +7,29 @@ import { catchError, timeout } from 'rxjs/operators';
 export class ReviewClient {
   constructor(
     @Inject('REVIEW_SERVICE') private readonly reviewClient: ClientProxy,
+    @Inject('AUTHENTICATION_SERVICE') private readonly authClient: ClientProxy,
   ) { }
 
   async review(review): Promise<any> {
     try {
-      return await firstValueFrom(
-        this.reviewClient
-          .send({ cmd: 'review' }, { ...review })
-          .pipe(
-            timeout(5000), // Set your desired timeout in milliseconds
-            catchError((error) => {
-              console.log(error.message)
-              if (error.message === 'You have already voted on this document') {
-                throw new HttpException(error.message, HttpStatus.CONFLICT);
-              }
-              throw new HttpException('Unable to review the document', HttpStatus.INTERNAL_SERVER_ERROR);
-            }),
-          ),
-      );
+      const isValidUser = await this.check(review.token);
+      if (isValidUser) {
+        return await firstValueFrom(
+          this.reviewClient
+            .send({ cmd: 'review' }, { ...review })
+            .pipe(
+              timeout(5000), // Set your desired timeout in milliseconds
+              catchError((error) => {
+                console.log(error.message)
+                if (error.message === 'You have already voted on this document') {
+                  throw new HttpException(error.message, HttpStatus.CONFLICT);
+                }
+                throw new HttpException('Unable to review the document', HttpStatus.INTERNAL_SERVER_ERROR);
+              }),
+            ),
+        );
+      }
+      
     } catch (error) {
       if (error.status === HttpStatus.CONFLICT) {
         throw new HttpException(error.message, HttpStatus.CONFLICT);
@@ -33,8 +38,24 @@ export class ReviewClient {
     }
   }
 
+  async check(jwt: any): Promise<{ access_token: string }> {
+    try {
+      return await firstValueFrom(
+         this.authClient.send({ cmd: 'check' }, { jwt }).pipe(
+          timeout(5000),
+          catchError((error) => {
+            console.log(error.message)
+            throw new HttpException(error.message, HttpStatus.UNAUTHORIZED);
+          }),
+        ),
+      );
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.UNAUTHORIZED);
+    }
+  }
+
   async onApplicationBootstrap() {
-    // await this.reviewClient.connect();
+    await this.reviewClient.connect();
     console.log('Connected');
   }
 }

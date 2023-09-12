@@ -6,7 +6,7 @@ export class Content {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column({ type: 'bytea' })
+    @Column({ type: 'bytea', select: false })
     file: Buffer;
 
     @Column()

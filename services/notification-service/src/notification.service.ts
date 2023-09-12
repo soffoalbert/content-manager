@@ -10,13 +10,17 @@ export class NotificationService {
   constructor(private readonly configService: ConfigService) {}
 
   async sendMail(data: any): Promise<string> {
-    const approveBtn = `https://0016-2a02-a211-8ec1-3b80-974-4132-ed86-493a.ngrok-free.app/review?approval=approved&documentId=${data.documentId}&userId=${data.userId}&token=${data.token}`;
-    const rejectBtn = `https://0016-2a02-a211-8ec1-3b80-974-4132-ed86-493a.ngrok-free.app/review?approval=rejected&documentId=${data.documentId}&userId=${data.userId}&token=${data.token}`;
+    console.log(data)
+    const NGROK_URLUrl = this.configService.get('NGROK_URL');
+    const approveBtn = `${NGROK_URLUrl}/review?approval=approved&documentId=${data.documentId}&userId=${data.userId}&token=${data.token}`;
+    const rejectBtn = `${NGROK_URLUrl}/review?approval=rejected&documentId=${data.documentId}&userId=${data.userId}&token=${data.token}`;
     const name = data.user.name
     const fileName = data.fileName
     const submitedAt = data.submittedAt
 
     console.log(data);
+
+    console.log(this.configService.get('NGROK_URL'))
 
     const transporter = nodemailer.createTransport({
       service: 'Gmail',

@@ -32,10 +32,12 @@ services:
       dockerfile: Dockerfile
     ports:
       - "3001:3001"
+    hostname: authentication-service
     depends_on:
       - user-service
     links:
       - user-service
+    entrypoint: ["yarn", "start"]
     networks:
       - test
 
@@ -54,6 +56,8 @@ services:
     build:
       context: ./services/notification-service
       dockerfile: Dockerfile
+    environment:
+      - NGROK_URL=${NGROK_URL}
     ports:
       - "3005:3005"
     depends_on:
@@ -141,6 +145,8 @@ services:
       - 'rabbitmq_data:/bitnami/rabbitmq/mnesia'
     networks:
       - test
+
 volumes:
   rabbitmq_data:
     driver: local
+  nginx-conf: 

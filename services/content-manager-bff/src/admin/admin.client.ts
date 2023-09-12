@@ -125,9 +125,9 @@ export class AdministratorClient {
   }
 
   async onApplicationBootstrap() {
-    // await this.authClient.connect();
-    // await this.reviewClient.connect();
-    // await this.userClient.connect();
+    await this.authClient.connect();
+    await this.reviewClient.connect();
+    await this.userClient.connect();
     console.log('connected')
   }
 }

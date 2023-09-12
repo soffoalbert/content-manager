@@ -77,6 +77,24 @@ import { JwtModule } from '@nestjs/jwt';
       },
     },
     {
+      name: 'AUTHENTICATION_SERVICE',
+      imports: [ConfigurationModule],
+      inject: [ConfigurationService],
+      useFactory: (configService: ConfigurationService) => {
+        const authServiceOptions = configService.authenticationServiceOptions;
+        if (!authServiceOptions) {
+          throw new UnauthorizedException('AUTHENTICATION_SERVICE options not found');
+        }
+        return {
+          transport: Transport.TCP,
+          options: {
+            port: authServiceOptions.options.port,
+            host: authServiceOptions.options.host
+          }
+        };
+      },
+    },
+    {
       name: 'CONTENT_SERVICE',
       imports: [ConfigurationModule],
       inject: [ConfigurationService],

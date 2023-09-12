@@ -14,7 +14,14 @@ export class ContentController {
         try {
             const contentToStore = new Content()
             contentToStore.file = data.file
-            return await this.contentService.store(contentToStore);
+            const storedContent = await this.contentService.store(contentToStore);
+            return {
+                id: storedContent.id,
+                fileName: storedContent.fileName,
+                fileURL: storedContent.fileUrl,
+                status: storedContent.status,
+                createdAt: storedContent.createdAt,
+            }
         } catch (error) {
             throw new RpcException(error.message)
         }
