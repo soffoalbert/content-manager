@@ -7,8 +7,10 @@ WORKDIR /app
 # Copy package.json and package-lock.json to the container
 COPY package*.json ./
 
+RUN yarn global add @nestjs/cli
+
 # Install NestJS application dependencies
-RUN yarn install
+RUN yarn install --only=development
 
 # Copy the rest of the application code to the container
 COPY . .

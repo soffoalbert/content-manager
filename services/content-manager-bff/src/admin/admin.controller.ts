@@ -2,7 +2,6 @@ import { Body, Controller, Get, Post, Req, UseGuards, Request, Param, Query, Htt
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBadRequestResponse, ApiOperation, ApiParam, ApiResponse, ApiTags, ApiUnauthorizedResponse, ApiBearerAuth, ApiBody, ApiConflictResponse, ApiQuery } from '@nestjs/swagger';
 import { AdministratorClient } from './admin.client';
-import { AuthorizationGuard } from 'src/authentication.guard';
 import { AdministratorGuard } from './adminstrator.guard';
 
 import { ApiProperty } from '@nestjs/swagger';
@@ -25,10 +24,7 @@ export class UserDTO {
   @ApiProperty({ description: 'The type of user', example: 'CONTENT_CREATOR' })
   userType: string;
 
-
 }
-
-
 
 export class ContentDTO {
 
@@ -42,6 +38,9 @@ export class ContentDTO {
 @ApiTags('Administrator')
 @Controller('admin')
 export class AdministratorController {
+
+  private isHealthy = true;
+
   constructor(private readonly administratorClient: AdministratorClient) { }
 
   @Post('/create/user')
@@ -105,6 +104,15 @@ export class AdministratorController {
       return await this.administratorClient.initiate(documentId);
     } catch (error) {
       throw new HttpException(error.message, error.status);
+    }
+  }
+
+  @Get('/health')
+  healthCheck() {
+    if (this.isHealthy) {
+      return 'OK';
+    } else {
+      throw new Error('Application is not healthy');
     }
   }
 }
