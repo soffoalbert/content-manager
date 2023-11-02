@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: content-manager-bff
+  labels:
+    app: content-manager
+    service: content-manager-bff
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: content-manager
+      service: content-manager-bff
+  template:
+    metadata:
+      labels:
+        app: content-manager
+        service: content-manager-bff
+    spec:
+      containers:
+      - name: content-manager-bff
+        image: soffoalbert/content-manager:content-manager-bff-v1
+        ports:
+        - containerPort: 8080
+        env:                    
+          - name: USER_SERVICE_HOST
+            value: user-service
+          - name: AUTHENTICATION_SERVICE_HOST
+            value: authentication-service
+          - name: AUTHENTICATION_SERVICE_PORT
+            value: "3001"
+          - name: USER_SERVICE_PORT
+            value: "3002"
+          - name: CONTENT_SERVICE_HOST
+            value: content-service
+          - name: CONTENT_SERVICE_PORT
+            value: "3003"
+          - name: REVIEW_SERVICE_HOST
+            value: review-service
+          - name: REVIEW_SERVICE_PORT
+            value: "3004"

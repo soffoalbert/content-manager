@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: authentication
+  labels:
+    app: content-manager
+    service: authentication
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: content-manager
+      service: authentication
+  template:
+    metadata:
+      labels:
+        app: content-manager
+        service: authentication
+    spec:
+      containers:
+      - name: authentication
+        image: your-docker-registry/authentication:latest
+        ports:
+        - containerPort: 8080

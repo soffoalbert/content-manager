@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: content-manager-bff
+  labels:
+    app: content-manager
+    service: content-manager-bff
+spec:
+  selector:
+    app: content-manager
+    service: content-manager-bff
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
