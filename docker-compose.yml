@@ -49,6 +49,12 @@ services:
       - "3003:3003"
     links:
       - content-db
+    environment:
+      POSTGRES_PORT: 5433
+      POSTGRES_DB: content-db
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: 198920
+      POSTGRES_HOST: content-db
     networks:
       - test
 
@@ -57,7 +63,9 @@ services:
       context: ./services/notification-service
       dockerfile: Dockerfile
     environment:
-      - NGROK_URL=${NGROK_URL}
+      NGROK_URL: ${NGROK_URL}
+      AUTH_EMAIL_ACCOUNT_ADDRESS: test@gmail.com 
+      AUTH_EMAIL_ACCOUNT_PASSWORD: 198920
     ports:
       - "3005:3005"
     depends_on:
@@ -70,6 +78,16 @@ services:
     build:
       context: ./services/review-service
       dockerfile: Dockerfile
+    environment: 
+      USER_SERVICE_HOST: user-service
+      USER_SERVICE_PORT: 3002
+      AUTHENTICATION_SERVICE_HOST: authentication-service
+      AUTHENTICATION_SERVICE_PORT: 3001
+      POSTGRES_HOST: review-db
+      POSTGRES_PORT: 5436 
+      POSTGRES_PASSWORD: 198920
+      POSTGRES_DB: review-db
+      POSTGRES_USER: root
     ports:
       - "3004:3004"
     depends_on:

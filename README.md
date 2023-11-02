@@ -43,3 +43,5 @@ navigate to the root directory of the application
 and run:
 
 `docker-compose up`
+
+Access the SWAGGER documentation here: http://localhost:3000/api 
